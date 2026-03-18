@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamStack | Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        :root{
+          --primary:#f96a2f;
+          --primary-2:#ff8c42;
+          --soft:#fff4ee;
+          --soft-border:#ffd9c4;
+          --bg:#f5f6fa;
+          --white:#fff;
+          --text:#18181b;
+          --muted:#888;
+          --border:#ebebeb;
+          --red:#ef4444;
+          --green:#22c55e;
+          --blue:#3b82f6;
+          --shadow:0 2px 16px rgba(0,0,0,0.07);
+          --radius:13px;
+          --sw:248px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+        .sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sw);background:var(--white);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;z-index:200;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+        .logo{display:flex;align-items:center;gap:10px;padding:4px 6px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+        .logo-box{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--primary-2),var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:-.5px;flex-shrink:0;}
+        .logo-name{font-size:17px;font-weight:800;color:var(--text);}
+        .logo-name span{color:var(--primary);}
+        .nav-lbl{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);padding:0 10px;margin:14px 0 6px;}
+        .sidebar nav a{display:flex;align-items:center;gap:11px;color:#555;text-decoration:none;padding:10px 12px;border-radius:9px;margin-bottom:2px;font-size:14px;font-weight:500;transition:all .18s;}
+        .sidebar nav a i{width:18px;text-align:center;font-size:14px;opacity:.8;}
+        .sidebar nav a:hover{background:var(--soft);color:var(--primary);}
+        .sidebar nav a.active{background:var(--soft);color:var(--primary);font-weight:700;}
+        .sidebar-footer{margin-top:auto;border-top:1px solid var(--border);padding-top:14px;}
+        .sidebar-footer a{display:flex;align-items:center;gap:11px;color:var(--muted);text-decoration:none;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:500;transition:all .18s;}
+        .sidebar-footer a:hover{background:#fff1f1;color:var(--red);}
+        .sidebar-footer a i{width:18px;text-align:center;}
+
+        .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:199;backdrop-filter:blur(2px);}
+        .overlay.show{display:block;}
+
+        .main{margin-left:var(--sw);min-height:100vh;padding:24px;}
+
+        .topbar{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:12px;}
+        .topbar-left{display:flex;align-items:center;gap:13px;}
+        .ham{display:none;width:38px;height:38px;border-radius:9px;background:var(--soft);border:1px solid var(--soft-border);color:var(--primary);font-size:16px;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;}
+        .topbar-left h3{font-size:15px;font-weight:700;}
+        .topbar-left p{font-size:12px;color:var(--muted);margin-top:1px;}
+        .topbar-right{display:flex;align-items:center;gap:10px;}
+        .icon-btn{width:38px;height:38px;border-radius:9px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;cursor:pointer;position:relative;transition:all .18s;}
+        .icon-btn:hover{border-color:var(--soft-border);color:var(--primary);}
+        .notif-dot{position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--primary);border-radius:50%;border:2px solid #fff;}
+        .user-chip{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--soft-border);border-radius:9px;padding:6px 12px;cursor:pointer;}
+        .user-chip span{font-size:13px;font-weight:700;color:var(--primary);}
+        .u-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary-2),var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;}
+
+        .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+        .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:flex;align-items:center;gap:15px;transition:transform .2s,box-shadow .2s;}
+        .card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.1);}
+        .c-icon{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+        .ci-o{background:#fff4ee;color:#f96a2f;}
+        .ci-g{background:#edfaf4;color:#22c55e;}
+        .ci-b{background:#eff6ff;color:#3b82f6;}
+        .ci-r{background:#fff1f1;color:#ef4444;}
+        .c-body h4{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+        .c-body p{font-size:26px;font-weight:800;line-height:1;}
+
+        .content-grid{display:grid;grid-template-columns:1fr 300px;gap:18px;}
+        .box{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
+        .box-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+        .box-hd h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
+        .box-hd h3 i{color:var(--primary);}
+
+        .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:all .18s;}
+        .btn-primary{background:linear-gradient(135deg,var(--primary-2),var(--primary));color:#fff;box-shadow:0 2px 10px rgba(249,106,47,.22);}
+        .btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+        .btn-ghost{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+        .btn-ghost:hover{border-color:var(--soft-border);color:var(--primary);}
+        .btn-cancel{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+        .btn-danger{background:var(--red);color:#fff;}
+        .btn-danger:hover{background:#dc2626;}
+        .btn-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;border:none;cursor:pointer;transition:all .18s;}
+        .btn-edit{background:#eff6ff;color:#3b82f6;}
+        .btn-edit:hover{background:#3b82f6;color:#fff;}
+        .btn-del{background:#fff1f1;color:#ef4444;}
+        .btn-del:hover{background:#ef4444;color:#fff;}
+
+        .search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 13px;margin-bottom:14px;}
+        .search-wrap i{color:var(--muted);font-size:13px;flex-shrink:0;}
+        .search-wrap input{border:none;background:transparent;outline:none;font-family:inherit;font-size:13px;width:100%;color:var(--text);}
+
+        .tbl-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;min-width:480px;}
+        thead tr{background:var(--soft);}
+        th{padding:11px 13px;text-align:left;font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.7px;border-bottom:2px solid var(--soft-border);white-space:nowrap;}
+        td{padding:12px 13px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+        tbody tr:last-child td{border-bottom:none;}
+        tbody tr{transition:background .15s;}
+        tbody tr:hover{background:var(--soft);}
+
+        .emp-cell{display:flex;align-items:center;gap:9px;}
+        .emp-av{width:33px;height:33px;min-width:33px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;}
+        .emp-name{font-weight:600;}
+        .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+        .t-dev{background:#eff6ff;color:#3b82f6;}
+        .t-design{background:#f5f0ff;color:#7c3aed;}
+        .t-pm{background:#edfaf4;color:#059669;}
+        .t-hr{background:#fffbeb;color:#d97706;}
+        .t-qa{background:#fff1f1;color:#dc2626;}
+        .t-default{background:var(--bg);color:#555;}
+
+        /* EMPTY */
+
+        .empty{text-align:center;padding:36px 20px;color:var(--muted);}
+        .empty i{font-size:34px;opacity:.25;margin-bottom:10px;display:block;}
+        .empty p{font-size:13px;}
+        .empty a{color:var(--primary);font-weight:600;text-decoration:none;}
+
+        .side-panel{display:flex;flex-direction:column;gap:18px;}
+        .act-item{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);}
+        .act-item:last-child{border-bottom:none;}
+        .act-ic{width:32px;height:32px;min-width:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;}
+        .ac-add{background:#edfaf4;color:#22c55e;}
+        .ac-del{background:#fff1f1;color:#ef4444;}
+        .ac-edit{background:#fff4ee;color:#f96a2f;}
+        .act-text p{font-size:13px;font-weight:600;}
+        .act-text span{font-size:11px;color:var(--muted);}
+        .rp-item{margin-bottom:13px;}
+        .rp-header{display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px;}
+        .rp-name{font-weight:600;}
+        .rp-count{color:var(--muted);font-size:12px;}
+        .rp-bar{height:6px;background:var(--bg);border-radius:20px;overflow:hidden;}
+        .rp-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--primary-2),var(--primary));}
+
+        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);}
+        .modal-bg.show{display:flex;}
+        .modal{background:var(--white);border-radius:16px;padding:28px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:popIn .25s ease;}
+        @keyframes popIn{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+        .modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+        .modal-hd h3{font-size:16px;font-weight:700;}
+        .modal-close{width:32px;height:32px;border-radius:8px;background:var(--bg);border:none;cursor:pointer;color:var(--muted);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+        .modal-close:hover{background:#fff1f1;color:var(--red);}
+        .form-group{margin-bottom:16px;}
+        .form-group label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+        .form-group input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:14px;color:var(--text);outline:none;transition:border .18s;background:var(--white);}
+        .form-group input:focus{border-color:var(--primary);}
+        .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+
+        .confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:600;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);}
+        .confirm-bg.show{display:flex;}
+        .confirm-box{background:var(--white);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:popIn .25s ease;}
+        .confirm-box .ci{width:52px;height:52px;border-radius:13px;background:#fff1f1;display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--red);margin:0 auto 14px;}
+        .confirm-box h3{font-size:16px;font-weight:700;margin-bottom:7px;}
+        .confirm-box p{font-size:13px;color:var(--muted);margin-bottom:20px;}
+        .confirm-btns{display:flex;gap:10px;justify-content:center;}
+
+        .toast{position:fixed;bottom:24px;right:24px;background:#18181b;color:#fff;padding:13px 18px;border-radius:11px;font-size:13px;font-weight:600;z-index:999;display:flex;align-items:center;gap:9px;box-shadow:0 8px 30px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);max-width:300px;}
+        .toast.show{transform:translateY(0);opacity:1;}
+        .toast.success{border-left:4px solid var(--green);}
+        .toast.error{border-left:4px solid var(--red);}
+        @media(max-width:1100px){.content-grid{grid-template-columns:1fr;}.side-panel{display:grid;grid-template-columns:1fr 1fr;}}
+        @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:none;}.main{margin-left:0;padding:14px;}.ham{display:flex;}.user-chip span{display:none;}}
+        @media(max-width:600px){.side-panel{grid-template-columns:1fr;}.topbar{padding:12px 14px;}}
+        @media(max-width:480px){.cards{grid-template-columns:1fr 1fr;}.modal{padding:20px;}}
+    </style>
+</head>
+
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <i id="toastIcon"></i>
+    <span id="toastMsg"></span>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-bg" id="confirmBg">
+    <div class="confirm-box">
+        <div class="ci"><i class="fa-solid fa-trash"></i></div>
+        <h3>Delete Employee?</h3>
+        <p>This action cannot be undone. The employee will be permanently removed.</p>
+        <div class="confirm-btns">
+            <button class="btn btn-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn"><i class="fa-solid fa-trash"></i> Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+    <div class="modal">
+        <div class="modal-hd">
+            <h3><i class="fa-solid fa-pen" style="color:var(--primary);margin-right:8px;font-size:14px;"></i>Update
+                Employee</h3>
+            <button class="modal-close" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="form-group">
+            <label>Full Name</label>
+            <label for="editName">
+                <input type="text" id="editName" placeholder="Enter full name">
+            </label>
+        </div>
+        <div class="form-group">
+            <label>Email Address</label>
+            <label for="editEmail">
+                <input type="email" id="editEmail" placeholder="Enter email">
+            </label>
+        </div>
+        <div class="form-group">
+            <label>Role / Designation</label>
+            <input type="text" id="editRole" placeholder="e.g. Developer, Designer, HR">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEdit()"><i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="app" style="display:flex;">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-box">TS</div>
+            <span class="logo-name">Team<span>Stack</span></span>
+        </div>
+
+        <div class="nav-lbl">Menu</div>
+        <nav>
+            <a th:href="@{/home}" class="active">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+
+            <a th:href="@{/saveEmployee}">
+                <i class="fa-solid fa-user-plus"></i> Add Employee
+            </a>
+        </nav>
+
+        <div class="nav-lbl">Account</div>
+        <nav>
+            <a th:href="@{/adminProfile}"><i class="fa-solid fa-circle-user"></i> My Profile</a>
+            <a href="/settings"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="ham" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <div>
+                    <h4>Welcome back, <span th:text="${admin.name}"></span> 👋</h4>
+                    <p id="todayDate"></p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
+                <div class="admin-chip">
+                    <a th:href="@{/admin/profile}" style="text-decoration:none; color:var(--primary); font-weight:700;" th:text="${admin.name}"></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="cards">
+            <div class="card">
+                <div class="c-icon ci-o"><i class="fa-solid fa-users"></i></div>
+                <div class="c-body"><h4>Total Employees</h4>
+                    <p id="statTotal" th:text="${totalEmployees}">0</p></div>
+            </div>
+
+            <div class="card">
+                <div class="c-icon ci-b"><i class="fa-solid fa-sitemap"></i></div>
+                <div class="c-body"><h4>Unique Roles</h4>
+                    <p id="statRoles" th:text="${uniqueRoles}">0</p></div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+
+            <!-- Table -->
+            <div class="box">
+                <div class="box-hd">
+                    <h3><i class="fa-solid fa-table-list"></i> Employee List</h3>
+                    <a href="/saveEmployee" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Employee</a>
+                </div>
+
+                <div class="search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <label for="searchInput">
+                        <input type="text" id="searchInput" placeholder="Search by name, email or role..."
+                                                            oninput="filterTable(this.value)">
+                    </label>
+                </div>
+
+                <div class="tbl-wrap">
+                    <table id="empTable">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Employee</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr th:if="${#lists.isEmpty(empList)}">
+                            <td colspan="5" style="text-align:center;color:gray;">
+                                No Employees Found
+                            </td>
+                        </tr>
+
+                        <tr th:each="emp, stat : ${empList}">
+                            <td th:text="${stat.count}"></td>
+
+                            <td>
+                                <div class="emp-cell">
+                                    <div class="emp-av"
+                                         th:text="${emp.name != null and emp.name.length() > 0 ? #strings.substring(emp.name,0,1) : ''}"></div>
+                                    <span class="emp-name" th:text="${emp.name}"></span>
+                                </div>
+                            </td>
+
+                            <td th:text="${emp.email}"></td>
+
+                            <td>
+        <span class="tag t-default"
+              th:text="${emp.role}"></span>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/update/{id}(id=${emp.id})}"
+                                   class="btn-icon btn-edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+                                <a th:href="@{/deleteEmployee/{id}(id=${emp.id})}"
+                                   class="btn-icon btn-del">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyState" class="empty" style="display:none;">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <p>No employees found. <a href="/saveEmployee">Add your first one →</a></p>
+                </div>
+
+                <div style="margin-top:14px;">
+                    <span id="countLabel" style="font-size:12px;color:var(--muted);"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleSidebar(){
+       const sidebar = document.querySelector(".sidebar");
+       const overlay = document.getElementById("overlay");
+
+       sidebar.classList.toggle("open");
+       overlay.classList.toggle("show");
+    }
+    function closeSidebar(){
+       document.querySelector(".sidebar").classList.remove("open");
+       document.getElementById("overlay").classList.remove("show");
+    }
+
+    function filterTable(value){
+       let rows = document.querySelectorAll("#empTable tbody tr");
+
+       rows.forEach(row=>{
+          row.style.display =
+            row.innerText.toLowerCase().includes(value.toLowerCase())
+            ? "" : "none";
+       });
+    }
+
+let deleteId = null;
+
+function openConfirm(id){
+    deleteId = id;
+    document.getElementById("confirmBg").classList.add("show");
+}
+
+function closeConfirm(){
+    deleteId = null;
+    document.getElementById("confirmBg").classList.remove("show");
+}
+
+document.getElementById("confirmDeleteBtn").addEventListener("click", function(){
+    if(deleteId){
+        // Redirect to delete endpoint
+        window.location.href = '/deleteEmployee/' + deleteId;
+    }
+});
+</script>
+</body>
+</html>

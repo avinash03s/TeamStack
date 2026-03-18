@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>TeamStack | Add Employee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        :root {
+            --primary: #f96a2f;
+            --primary-2: #ff8c42;
+            --soft: #fff4ee;
+            --soft-border: #ffd9c4;
+            --bg: #f5f6fa;
+            --white: #fff;
+            --text: #18181b;
+            --muted: #888;
+            --border: #ebebeb;
+            --red: #ef4444;
+            --green: #22c55e;
+            --shadow: 0 2px 16px rgba(0,0,0,.07);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+            --radius: 13px;
+            --sw: 248px;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { overflow-x: hidden; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            height: 100vh; width: var(--sw);
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            padding: 20px 14px;
+            display: flex; flex-direction: column;
+            z-index: 300;
+            transition: transform .3s cubic-bezier(.4,0,.2,1);
+            overflow-y: auto;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            padding: 4px 6px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px; flex-shrink: 0;
+        }
+        .logo-box {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 800; font-size: 13px; flex-shrink: 0;
+        }
+        .logo-name { font-size: 17px; font-weight: 800; color: var(--text); }
+        .logo-name span { color: var(--primary); }
+        .nav-lbl {
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 1.4px; text-transform: uppercase;
+            color: var(--muted); padding: 0 10px; margin: 14px 0 6px;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: 11px;
+            color: #555; text-decoration: none;
+            padding: 10px 12px; border-radius: 9px;
+            margin-bottom: 2px; font-size: 14px; font-weight: 500;
+            transition: all .18s;
+        }
+        .sidebar nav a i { width: 18px; text-align: center; font-size: 14px; opacity: .8; }
+        .sidebar nav a:hover { background: var(--soft); color: var(--primary); }
+        .sidebar nav a.active { background: var(--soft); color: var(--primary); font-weight: 700; }
+        .sidebar nav a.active i { opacity: 1; }
+        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 14px; flex-shrink: 0; }
+        .sidebar-footer a {
+            display: flex; align-items: center; gap: 11px;
+            color: var(--muted); text-decoration: none;
+            padding: 10px 12px; border-radius: 9px;
+            font-size: 14px; font-weight: 500; transition: all .18s;
+        }
+        .sidebar-footer a:hover { background: #fff1f1; color: var(--red); }
+        .sidebar-footer a i { width: 18px; text-align: center; }
+
+        .overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.38); z-index: 299;
+            backdrop-filter: blur(2px);
+        }
+        .overlay.show { display: block; }
+
+        .main { margin-left: var(--sw); width: calc(100% - var(--sw)); min-height: 100vh; padding: 24px; overflow-x: hidden; }
+
+        .topbar {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 22px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; gap: 12px;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 13px; }
+        .ham {
+            display: none; width: 38px; height: 38px; border-radius: 9px;
+            background: var(--soft); border: 1px solid var(--soft-border);
+            color: var(--primary); font-size: 16px; cursor: pointer;
+            align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .topbar-left h4 { font-size: 15px; font-weight: 700; }
+        .topbar-left p  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .icon-btn {
+            width: 38px; height: 38px; border-radius: 9px;
+            background: var(--bg); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); font-size: 15px; cursor: pointer;
+            position: relative; transition: all .18s;
+        }
+        .icon-btn:hover { border-color: var(--soft-border); color: var(--primary); }
+        .notif-dot {
+            position: absolute; top: 8px; right: 8px;
+            width: 7px; height: 7px;
+            background: var(--primary); border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        .user-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--soft); border: 1px solid var(--soft-border);
+            border-radius: 9px; padding: 6px 12px; cursor: pointer;
+        }
+        .user-chip .chip-name { font-size: 13px; font-weight: 700; color: var(--primary); }
+        .u-av {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 12px;
+        }
+
+        .breadcrumb {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 12px; color: var(--muted);
+            margin-bottom: 18px; flex-wrap: wrap;
+        }
+        .breadcrumb a { color: var(--muted); text-decoration: none; transition: color .15s; }
+        .breadcrumb a:hover { color: var(--primary); }
+        .breadcrumb .sep { opacity: .4; font-size: 9px; }
+        .breadcrumb .current { color: var(--primary); font-weight: 600; }
+
+        .content-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: fadeUp .32s ease both;
+        }
+
+        .form-card-header {
+            padding: 24px 28px 20px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, #fff9f6 0%, var(--white) 100%);
+            position: relative; overflow: hidden;
+        }
+        .form-card-header::before {
+            content: '';
+            position: absolute; top: -40px; right: -40px;
+            width: 140px; height: 140px;
+            background: radial-gradient(circle, rgba(249,106,47,.07) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hdr-row { display: flex; align-items: center; gap: 14px; position: relative; }
+        .hd-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 17px; flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(249,106,47,.28);
+        }
+        .hdr-text h3 { font-size: 17px; font-weight: 800; }
+        .hdr-text p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+        .form-body { padding: 26px 28px; }
+
+        .sec-title {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--muted); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sec-title i { color: var(--primary); }
+        .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 20px;
+            margin-bottom: 24px;
+        }
+        .span-2 { grid-column: 1 / -1; }
+
+        .form-group label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            color: #4a4a4a; margin-bottom: 7px;
+        }
+        .lbl-icon {
+            width: 18px; height: 18px; border-radius: 5px;
+            background: var(--soft);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: var(--primary);
+        }
+        .req { color: var(--primary); margin-left: auto; font-size: 10px; font-weight: 600; opacity: .75; }
+
+        .input-wrap { position: relative; }
+        .input-wrap .fi {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: #ccc; font-size: 12px;
+            pointer-events: none; transition: color .18s;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit; font-size: 14px; color: var(--text);
+            outline: none; transition: all .2s;
+            background: var(--white);
+            -webkit-appearance: none; appearance: none;
+        }
+        .input-wrap input::placeholder { color: #c8c8c8; }
+        .input-wrap input:hover:not(:focus) { border-color: #d8d8d8; }
+        .input-wrap input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(249,106,47,.1);
+        }
+        .input-wrap input:focus ~ .fi { color: var(--primary); }
+        .input-wrap input.error { border-color: var(--red) !important; box-shadow: 0 0 0 3px rgba(239,68,68,.1) !important; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+        .input-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+        .form-footer {
+            padding: 18px 28px 26px;
+            border-top: 1px solid var(--border);
+            background: #fafafa;
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+
+        .btn-submit {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 26px;
+            background: linear-gradient(135deg, var(--primary-2), var(--primary));
+            color: #fff; border: none; border-radius: 10px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(249,106,47,.3);
+            transition: all .2s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(249,106,47,.38); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .btn-reset {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 20px;
+            background: var(--white); color: #555;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-family: inherit; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-reset:hover { border-color: #d0d0d0; color: var(--text); background: #f6f6f6; }
+
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 7px;
+            margin-left: auto;
+            padding: 10px 16px; border-radius: 9px;
+            background: transparent; color: var(--muted); border: none;
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            cursor: pointer; text-decoration: none; transition: all .2s;
+        }
+        .btn-back:hover { color: var(--primary); background: var(--soft); }
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            background: #18181b; color: #fff;
+            padding: 13px 18px; border-radius: 11px;
+            font-size: 13px; font-weight: 600;
+            z-index: 999; display: flex; align-items: center; gap: 9px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.2);
+            transform: translateY(80px); opacity: 0;
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            max-width: 300px; pointer-events: none;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .toast.success { border-left: 4px solid var(--green); }
+        .toast.error   { border-left: 4px solid var(--red); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .topbar     { animation: fadeUp .22s ease both; }
+        .breadcrumb { animation: fadeUp .26s ease both; }
+        @media (max-width: 900px) {
+            :root { --sw: 220px; }
+            .content-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; width: 100%; padding: 14px; }
+            .ham { display: flex !important; }
+            .user-chip .chip-name { display: none; }
+            .form-grid { grid-template-columns: 1fr; }
+            .span-2 { grid-column: auto; }
+            .form-card { border-radius: 12px; }
+            .form-card-header { padding: 18px 20px; }
+            .form-body { padding: 20px; }
+            .form-footer { padding: 16px 20px 22px; }
+            .btn-back { margin-left: 0; }
+        }
+        @media (max-width: 520px) {
+            .main { padding: 10px; }
+            .topbar { padding: 11px 14px; }
+            .topbar-left h4 { font-size: 14px; }
+            .topbar-left p { display: none; }
+            .topbar-right .icon-btn { display: none; }
+            .hd-icon { width: 38px; height: 38px; font-size: 15px; }
+            .hdr-text h3 { font-size: 15px; }
+            .form-footer { flex-direction: column; gap: 10px; }
+            .btn-submit { width: 100%; justify-content: center; }
+            .btn-reset  { width: 100%; justify-content: center; }
+            .btn-back   { width: 100%; justify-content: center; }
+            .breadcrumb { display: none; }
+            .toast { bottom: 14px; right: 14px; left: 14px; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <i id="toastIcon"></i>
+    <span id="toastMsg"></span>
+</div>
+
+<div style="display:flex; width:100%; overflow:hidden;">
+
+    <!--SIDEBAR-->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-box">TS</div>
+            <span class="logo-name">Team<span>Stack</span></span>
+        </div>
+
+        <p class="nav-lbl">Menu</p>
+        <nav>
+            <a th:href="@{/home}">
+                <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            <a th:href="@{/addEmployee}" class="active">
+                <i class="fa-solid fa-user-plus"></i> Add Employee
+            </a>
+        </nav>
+
+        <p class="nav-lbl">Account</p>
+        <nav>
+            <a th:href="@{/adminProfile}"><i class="fa-solid fa-circle-user"></i> My Profile</a>
+            <a th:href="@{/settings}"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a th:href="@{/logout}"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!--MAIN-->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="ham" onclick="toggleSidebar()" aria-label="Open menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <h4 th:text="${emp.id == null} ? 'Add New Employee 👤' : 'Update Employee ✏️'"></h4>
+                    <p id="todayDate"></p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn" title="Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-dot"></span>
+                </div>
+                <div class="user-chip">
+                    <div class="u-av" id="userInitial">A</div>
+                    <span class="chip-name" th:text="${admin.name}">Admin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="/home"><i class="fa-solid fa-house" style="font-size:10px;"></i> Dashboard</a>
+            <span class="sep"><i class="fa-solid fa-chevron-right"></i></span>
+            <span class="current">
+             <i th:class="${emp.id == null} ? 'fa-solid fa-user-plus' : 'fa-solid fa-pen'"></i>
+            <span th:text="${emp.id == null} ? 'Add Employee' : 'Update Employee'"></span>
+</span>
+        </nav>
+
+        <!-- Content Layout -->
+        <div class="content-layout">
+
+            <!-- Form Card -->
+            <div class="form-card">
+
+                <!-- Header -->
+                <div class="form-card-header">
+                    <div class="hdr-row">
+                        <div class="hd-icon">
+                            <i th:class="${emp.id == null} ? 'fa-solid fa-user-plus' : 'fa-solid fa-pen'"></i>
+                        </div>
+                        <div class="hdr-text">
+                            <h3 th:text="${emp.id == null} ? 'Employee Information' : 'Edit Employee Information'"></h3>
+                            <p th:text="${emp.id == null} ?
+                                          'Fill in the details below to register a new team member' :
+                                          'Update the details below to modify employee information'">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUCCESS MESSAGE -->
+                <div th:if="${message}" class="alert alert-success"
+                     style="margin:16px; padding:12px; border-radius:8px; background:#d1fae5; color:#065f46;">
+                    <span th:text="${message}"></span>
+                </div>
+
+                <!-- ERROR MESSAGE -->
+                <div th:if="${errorMessage}" class="alert alert-error"
+                     style="margin:16px; padding:14px; border-radius:10px; background:#fee2e2; border-left:4px solid #ef4444; color:#991b1b; display:flex; gap:12px; align-items:center;">
+                    <span th:text="${errorMessage}"></span>
+                </div>
+
+                <!-- Form Body -->
+                <form th:action="${emp.id != null ? '/updateEmployee' : '/saveEmployee'}"
+                      th:object="${emp}" method="post" id="empForm" novalidate>
+
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="form-body">
+
+                        <!-- Personal Details -->
+                        <p class="sec-title"><i class="fa-solid fa-circle-user"></i> Personal Details</p>
+                        <div class="form-grid">
+
+                            <div class="form-group span-2">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-user"></i></span>
+                                    Full Name <span class="req">Required</span>
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="text" id="name" th:field="*{name}" placeholder="e.g. Your Name"
+                                               required>
+                                    </label>
+                                    <i class="fa-regular fa-user fi"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-envelope"></i></span>
+                                    Email Address <span class="req">Required</span>
+                                </label>
+                                <div class="input-wrap">
+                                    <label for="email">
+                                        <input type="email" id="email" th:field="*{email}"
+                                               placeholder="e.g. xyz@gmail.com"
+                                               required>
+                                    </label>
+                                    <i class="fa-regular fa-envelope fi"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-phone"></i></span>
+                                    Phone Number
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="tel" th:field="*{phone}" placeholder="e.g. +91 98765 43210">
+                                    </label>
+                                    <i class="fa-solid fa-phone fi"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Details -->
+                        <p class="sec-title"><i class="fa-solid fa-briefcase"></i> Work Details</p>
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-briefcase"></i></span>
+                                    Role / Designation <span class="req">Required</span>
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="text" id="role" th:field="*{role}"
+                                               placeholder="e.g. Java Developer" required>
+                                    </label>
+                                    <i class="fa-solid fa-briefcase fi"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-calendar"></i></span>
+                                    Joining Date <span class="req">Required</span>
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="date" id="joiningDate" th:field="*{joiningDate}" required>
+                                    </label>
+                                    <i class="fa-regular fa-calendar fi"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-rupee-sign"></i></span>
+                                    Salary (₹)
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="number" th:field="*{salary}" placeholder="e.g. 50000" min="0">
+                                    </label>
+                                    <i class="fa-solid fa-indian-rupee-sign fi"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <span class="lbl-icon"><i class="fa-solid fa-location-dot"></i></span>
+                                    City
+                                </label>
+                                <div class="input-wrap">
+                                    <label>
+                                        <input type="text" th:field="*{city}" placeholder="e.g. Pune">
+                                    </label>
+                                    <i class="fa-solid fa-location-dot fi"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- Footer Buttons -->
+                    <div class="form-footer">
+                        <button type="submit" class="btn-submit">
+                            <i th:class="${emp.id == null} ? 'fa-solid fa-user-plus' : 'fa-solid fa-pen'"></i>
+                            <span th:text="${emp.id == null} ? 'Add Employee' : 'Update Employee'"></span>
+                        </button>
+                        <button type="button" class="btn-reset" onclick="resetForm()">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+                        <a th:href="@{/home}" class="btn-back">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Side Panel -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+            <!-- Tips Box -->
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .38s ease both;">
+                <div style="padding:16px 18px 14px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#fff9f6,#fff);">
+                    <h4 style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;">
+                        <span style="width:28px;height:28px;border-radius:8px;background:var(--soft);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:var(--primary);flex-shrink:0;"><i
+                                class="fa-solid fa-lightbulb"></i></span>
+                        Quick Tips
+                    </h4>
+                </div>
+                <div style="padding:16px 18px;">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="width:22px;height:22px;border-radius:6px;background:#edfaf4;display:flex;align-items:center;justify-content:center;font-size:10px;color:#22c55e;flex-shrink:0;margin-top:1px;"><i
+                                    class="fa-solid fa-check"></i></span>
+                            <p style="font-size:12px;color:#555;line-height:1.6;">Fields marked <span
+                                    style="color:var(--primary);font-weight:700;">Required</span> must be filled before
+                                submitting.</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="width:22px;height:22px;border-radius:6px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:10px;color:#3b82f6;flex-shrink:0;margin-top:1px;"><i
+                                    class="fa-solid fa-envelope"></i></span>
+                            <p style="font-size:12px;color:#555;line-height:1.6;">Use a valid company email address for
+                                official communications.</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="width:22px;height:22px;border-radius:6px;background:#fff4ee;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--primary);flex-shrink:0;margin-top:1px;"><i
+                                    class="fa-solid fa-calendar"></i></span>
+                            <p style="font-size:12px;color:#555;line-height:1.6;">Joining Date should match the official
+                                offer letter date.</p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start;">
+                            <span style="width:22px;height:22px;border-radius:6px;background:#f5f0ff;display:flex;align-items:center;justify-content:center;font-size:10px;color:#7c3aed;flex-shrink:0;margin-top:1px;"><i
+                                    class="fa-solid fa-rupee-sign"></i></span>
+                            <p style="font-size:12px;color:#555;line-height:1.6;">Salary field is optional and can be
+                                updated later from the employee profile.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Required Fields Note -->
+            <div style="background:var(--soft);border:1px solid var(--soft-border);border-radius:12px;padding:16px 18px;animation:fadeUp .42s ease both;">
+                <p style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:7px;">
+                    <i class="fa-solid fa-circle-info"></i> Required Fields
+                </p>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <span style="font-size:12px;color:#555;display:flex;align-items:center;gap:7px;"><i
+                            class="fa-solid fa-circle" style="font-size:5px;color:var(--primary);"></i> Full Name</span>
+                    <span style="font-size:12px;color:#555;display:flex;align-items:center;gap:7px;"><i
+                            class="fa-solid fa-circle"
+                            style="font-size:5px;color:var(--primary);"></i> Email Address</span>
+                    <span style="font-size:12px;color:#555;display:flex;align-items:center;gap:7px;"><i
+                            class="fa-solid fa-circle" style="font-size:5px;color:var(--primary);"></i> Role / Designation</span>
+                    <span style="font-size:12px;color:#555;display:flex;align-items:center;gap:7px;"><i
+                            class="fa-solid fa-circle"
+                            style="font-size:5px;color:var(--primary);"></i> Joining Date</span>
+                </div>
+            </div>
+
+            <!-- Need Help -->
+            <div style="background:linear-gradient(135deg,var(--primary-2),var(--primary));border-radius:12px;padding:18px;animation:fadeUp .46s ease both;">
+                <p style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+                    <i class="fa-solid fa-headset"></i> Need Help?
+                </p>
+                <p style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:12px;">Contact HR
+                    admin for any issues with employee onboarding or data entry.</p>
+                <a href="/cdn-cgi/l/email-protection#472f35073322262a343326242c6924282a"
+                   style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;transition:background .18s;"
+                   onmouseover="this.style.background='rgba(255,255,255,.3)'"
+                   onmouseout="this.style.background='rgba(255,255,255,.2)'">
+                    <i class="fa-regular fa-envelope"></i> Contact HR
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+    // Date
+    const d = new Date();
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('todayDate').textContent =
+        `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+    // Sidebar
+    function toggleSidebar() {
+        const sb = document.getElementById('sidebar');
+        const ov = document.getElementById('overlay');
+        sb.classList.toggle('open');
+        ov.classList.toggle('show');
+        document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+
+    // Toast
+    let toastT;
+    function showToast(msg, type = 'success') {
+        const t  = document.getElementById('toast');
+        const ic = document.getElementById('toastIcon');
+        document.getElementById('toastMsg').textContent = msg;
+        t.className = `toast ${type} show`;
+        ic.className = type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
+        ic.style.color = type === 'success' ? '#22c55e' : '#ef4444';
+        clearTimeout(toastT);
+        toastT = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Reset
+    function resetForm() {
+        document.getElementById('empForm').reset();
+        document.querySelectorAll('.input-wrap input').forEach(el => el.classList.remove('error'));
+        showToast('Form has been cleared', 'success');
+    }
+
+    // Validation
+    document.getElementById('empForm').addEventListener('submit', function (e) {
+        const required = ['name','email','role','joiningDate'];
+        let valid = true;
+        required.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el.value.trim()) {
+                el.classList.add('error');
+                el.addEventListener('input', () => el.classList.remove('error'), { once: true });
+                valid = false;
+            }
+        });
+         if (!valid) {
+            e.preventDefault();
+            showToast('Please fill all required fields', 'error');
+        }
+    });
+</script>
+</body>
