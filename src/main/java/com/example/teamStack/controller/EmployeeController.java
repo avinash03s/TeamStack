@@ -181,4 +181,20 @@ public class EmployeeController {
         re.addFlashAttribute("message", "Admin Update Successful..!");
         return "redirect:/adminProfile";
     }
+
+    @GetMapping("/employee/{id}")
+    public String viewEmployeeDetails(@PathVariable Long id,
+                                      Model model,
+                                      HttpSession session) {
+        Admin admin = (Admin) session.getAttribute("admin");
+        if (admin == null) {
+            return "redirect:/login";
+        }
+        Employee emp = employeeService.getEmployeeById(id);
+        if (emp == null) {
+            return "redirect:/home";
+        }
+        model.addAttribute("employee", emp);
+        return "employee-details";
+    }
 }

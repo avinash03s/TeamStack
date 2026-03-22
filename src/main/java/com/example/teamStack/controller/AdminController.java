@@ -41,6 +41,7 @@ public class AdminController {
     public String registerAdmin(@Valid @ModelAttribute Admin admin) {
         log.info("Admin registration request received for email: {}", admin.getEmail());
         adminService.registerAdmin(admin);
+        emailService.registerSuccessful(admin.getEmail(),admin.getName());
         log.info("Admin registered successfully with email: {}", admin.getEmail());
         return "redirect:/login";
     }
@@ -101,6 +102,7 @@ public class AdminController {
         return "forgot-password";
     }
 
+    //handling form
     @PostMapping("/forgotPasswordForm")
     public String forgotPassword(@RequestParam String email,
                                  @RequestParam String password,
@@ -114,6 +116,7 @@ public class AdminController {
         return "reset-password";
     }
 
+    //handling form
     @PostMapping("/resetPassword")
     public String resetPassword(@RequestParam String email,
                                 @RequestParam String password,
@@ -131,6 +134,44 @@ public class AdminController {
         redirectAttributes.addFlashAttribute("success",
                 "Password updated successfully. Please login.");
         return "redirect:/login";
+    }
+
+    @GetMapping("/delete-account")
+    public String showDeleteAccountPage(HttpSession session) {
+        Admin admin = (Admin) session.getAttribute("admin");
+        if (admin == null) {
+            return "redirect:/login";
+        }
+        return "delete-account";
+    }
+
+    @PostMapping("/deleteAccount")
+    public String deleteAccount(@RequestParam String email,
+                                @RequestParam String password,
+                                HttpSession session,
+                                RedirectAttributes ra) {
+        Admin admin = (Admin) session.getAttribute("admin");
+        if (admin == null) {
+            return "redirect:/login";
+        }
+        if (!admin.getEmail().equals(email) || !admin.getPassword().equals(password)) {
+            ra.addFlashAttribute("error", "Invalid email or password");
+            return "redirect:/settings";
+        }
+        employeeService.deleteByAdminId(admin.getId());
+        adminService.deleteAdmin(admin.getId());
+        session.invalidate();
+        ra.addFlashAttribute("success", "Account deleted successfully");
+        return "redirect:/login";
+    }
+
+    @GetMapping("/settings")
+    public String settingsPage(HttpSession session) {
+        Admin admin = (Admin) session.getAttribute("admin");
+        if (admin == null) {
+            return "redirect:/login";
+        }
+        return "settings";
     }
 
     //logout controller

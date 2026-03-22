@@ -48,18 +48,6 @@ public class EmployeeServiceImplements implements EmployeeService {
         log.info("Employee updated successfully with id: {}", employee.getId());
     }
 
-    @Override
-    public List<Employee> getAllEmployees() {
-        log.debug("Fetching all employees from database");
-        List<Employee> list = employeeRepository.findAll();
-        if (list.isEmpty()) {
-            log.warn("Employee list is empty");
-            throw new EmployeeNotFound("Employee Data Not Found...");
-        }
-        log.info("Total employees fetched: {}", list.size());
-        return list;
-    }
-
     @Transactional
     @Override
     public void deleteEmployee(Long id) {
@@ -94,5 +82,10 @@ public class EmployeeServiceImplements implements EmployeeService {
     @Override
     public boolean emailExists(String email) {
         return employeeRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void deleteByAdminId(Long adminId) {
+        employeeRepository.deleteByAdminId(adminId);
     }
 }

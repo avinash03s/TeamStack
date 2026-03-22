@@ -398,7 +398,7 @@
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div>
-                    <h4 th:text="${emp.id == null} ? 'Add New Employee 👤' : 'Update Employee ✏️'"></h4>
+                    <h4 th:text="${emp.id == null} ? 'Add New Employee' : 'Update Employee'"></h4>
                     <p id="todayDate"></p>
                 </div>
             </div>
@@ -409,6 +409,7 @@
                 </div>
                 <div class="user-chip">
                     <div class="u-av" id="userInitial">A</div>
+                    <a th:href="@{/adminProfile}"></a>
                     <span class="chip-name" th:text="${admin.name}">Admin</span>
                 </div>
             </div>

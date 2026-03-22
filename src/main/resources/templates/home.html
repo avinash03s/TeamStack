@@ -333,9 +333,10 @@
                             </td>
                         </tr>
 
-                        <tr th:each="emp, stat : ${empList}">
+                        <tr th:each="emp, stat : ${empList}"
+                            th:onclick="'window.location.href=\'/employee/' + ${emp.id} + '\';'"
+                            style="cursor:pointer;">
                             <td th:text="${stat.count}"></td>
-
                             <td>
                                 <div class="emp-cell">
                                     <div class="emp-av"
@@ -343,9 +344,7 @@
                                     <span class="emp-name" th:text="${emp.name}"></span>
                                 </div>
                             </td>
-
                             <td th:text="${emp.email}"></td>
-
                             <td>
         <span class="tag t-default"
               th:text="${emp.role}"></span>
@@ -353,12 +352,14 @@
 
                             <td>
                                 <a th:href="@{/update/{id}(id=${emp.id})}"
-                                   class="btn-icon btn-edit">
+                                   class="btn-icon btn-edit"
+                                   onclick="event.stopPropagation();">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
 
                                 <a th:href="@{/deleteEmployee/{id}(id=${emp.id})}"
-                                   class="btn-icon btn-del">
+                                   class="btn-icon btn-del"
+                                   onclick="event.stopPropagation();">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>
