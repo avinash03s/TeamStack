@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "admin", indexes = {@Index(name = "idx_admin_email", columnList = "email")})//indexing
+@Table(name = "admin", indexes = {@Index(name = "idx_admin_email", columnList = "email"),
+@Index(name = "idx_admin_password",columnList = "password")})//indexing
 public class Admin {
 
     @Id

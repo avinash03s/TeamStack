@@ -69,4 +69,9 @@ public class AdminServiceImplements implements AdminService {
             repository.save(admin);   // important
         }
     }
+
+    @Override
+    public void deleteAdmin(Long id) {
+        repository.deleteById(id);
+    }
 }

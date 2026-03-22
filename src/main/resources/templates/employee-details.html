@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Details - TeamStack</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        body{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:linear-gradient(135deg,#f5f7fa,#c3cfe2);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:15px;
+        }
+        .decoration{
+            position:absolute;
+            top:-180px;
+            right:-180px;
+            width:700px;
+            height:700px;
+            background:linear-gradient(135deg,#ff6b35,#ff8c42);
+            border-radius:50%;
+            z-index:0;
+        }
+        .container{
+            background:white;
+            width:100%;
+            max-width:500px;
+            padding:30px;
+            border-radius:18px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.1);
+            position:relative;
+            z-index:2;
+        }
+        .logo{
+            text-align:center;
+            margin-bottom:10px;
+        }
+        .logo h1{
+            font-size:30px;
+            color:#ff6b35;
+        }
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+            color:#5a6c7d;
+        }
+        .info{
+            margin-bottom:15px;
+            font-size:15px;
+        }
+        .info b{
+            color:#333;
+        }
+        .info span{
+            color:#555;
+            margin-left:5px;
+        }
+        .btn-back{
+            display:block;
+            width:100%;
+            padding:11px;
+            margin-top:20px;
+            background:linear-gradient(135deg,#ff6b35,#ff8c42);
+            border:none;
+            border-radius:25px;
+            font-size:15px;
+            font-weight:600;
+            color:white;
+            cursor:pointer;
+            text-align:center;
+            text-decoration:none;
+        }
+        .btn-back:hover{
+            opacity:0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="decoration"></div>
+<div class="container">
+    <div class="logo">
+        <h1>TeamStack</h1>
+    </div>
+    <h2>Employee Details</h2>
+    <div class="info"><b>Name:</b> <span th:text="${employee.name}"></span></div>
+    <div class="info"><b>Email:</b> <span th:text="${employee.email}"></span></div>
+    <div class="info"><b>Role:</b> <span th:text="${employee.role}"></span></div>
+    <div class="info"><b>Phone No:</b> <span th:text="${employee.phone}"></span></div>
+    <div class="info"><b>City:</b> <span th:text="${employee.city}"></span></div>
+    <div class="info"><b>Joining Date:</b> <span th:text="${employee.joiningDate}"></span></div>
+    <a href="/home" class="btn-back">
+        ⬅ Back to Dashboard
+    </a>
+</div>
+</body>
+</html>

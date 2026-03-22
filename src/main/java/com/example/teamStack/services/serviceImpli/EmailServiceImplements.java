@@ -53,4 +53,23 @@ public class EmailServiceImplements implements EmailService {
             System.out.println("EMAIL FAILED: " + e.getMessage());
         }
     }
+
+    @Override
+    public void registerSuccessful(String toEmail, String name) {
+        try {
+            System.out.println("EMAIL SERVICE CALLED for: " + toEmail);
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject("Registration Successful..!");
+            message.setText(
+                    "Hello " + name + ",\n\n" +
+                            "From TeamStack..!\n" +
+                            "Thank you for Register to TeamStack please Login and continue Your Journey..!\n\n" +
+                            "Best Regards,\nTeamStack Family"
+            );
+            mailSender.send(message);
+        }catch (Exception e){
+            System.out.println("EMAIL FAILED: " + e.getMessage());
+        }
+    }
 }
