@@ -6,7 +6,6 @@ import com.example.teamStack.services.AdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,8 +69,14 @@ public class AdminServiceImplements implements AdminService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteAdmin(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return repository.existsByEmail(email);
     }
 }

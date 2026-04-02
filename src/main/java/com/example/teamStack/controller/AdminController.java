@@ -1,6 +1,7 @@
 package com.example.teamStack.controller;
 import com.example.teamStack.entity.Admin;
 import com.example.teamStack.entity.Employee;
+import com.example.teamStack.exceptions.DuplicateEmailFound;
 import com.example.teamStack.services.AdminService;
 import com.example.teamStack.services.EmailService;
 import com.example.teamStack.services.EmployeeService;
@@ -38,11 +39,23 @@ public class AdminController {
 
     // Handle registration
     @PostMapping("/regForm")
-    public String registerAdmin(@Valid @ModelAttribute Admin admin) {
+    public String registerAdmin(@Valid @ModelAttribute Admin admin,RedirectAttributes attributes) {
         log.info("Admin registration request received for email: {}", admin.getEmail());
-        adminService.registerAdmin(admin);
-        emailService.registerSuccessful(admin.getEmail(),admin.getName());
-        log.info("Admin registered successfully with email: {}", admin.getEmail());
+        try {
+            boolean emailExists = adminService.emailExists(admin.getEmail());
+            if (emailExists){
+                attributes.addFlashAttribute("errorMessage",
+                        "Your are Already Register..!");
+                log.error("Admin Email Id Already Register..!");
+                return "redirect:/register";
+            }
+            adminService.registerAdmin(admin);
+            emailService.registerSuccessful(admin.getEmail(), admin.getName());
+            log.info("Admin registered successfully with email: {}", admin.getEmail());
+            attributes.addFlashAttribute("message", "Register successfully!");
+        }catch (DuplicateEmailFound e){
+            attributes.addFlashAttribute("errorMessage", "Your are Already Register..!");
+        }
         return "redirect:/login";
     }
 

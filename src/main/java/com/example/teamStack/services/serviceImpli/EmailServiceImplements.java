@@ -54,6 +54,7 @@ public class EmailServiceImplements implements EmailService {
         }
     }
 
+    @Async
     @Override
     public void registerSuccessful(String toEmail, String name) {
         try {

@@ -8,4 +8,5 @@ public interface AdminService {
     Admin findByEmail(String email);
     void updatePassword(String email, String newPassword);
     void deleteAdmin(Long id);
+    boolean emailExists(String email);
 }
