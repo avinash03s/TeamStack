@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -151,6 +151,19 @@
         <p>Collaboration Made Simple</p>
     </div>
     <h3>Register</h3>
+
+    <!-- SUCCESS MESSAGE -->
+    <div th:if="${message}" class="alert alert-success"
+         style="margin:16px; padding:12px; border-radius:8px; background:#d1fae5; color:#065f46;">
+        <span th:text="${message}"></span>
+    </div>
+
+    <!-- ERROR MESSAGE -->
+    <div th:if="${errorMessage}" class="alert alert-error"
+         style="margin:16px; padding:14px; border-radius:10px; background:#fee2e2; border-left:4px solid #ef4444; color:#991b1b; display:flex; gap:12px; align-items:center;">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
     <form action="regForm" method="POST">
         <div class="form-group">
             <label>Full Name</label>
